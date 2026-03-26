@@ -32,7 +32,18 @@ CertiChain/
 - OneChain CLI installed
 - OneChain wallet with testnet ONE tokens
 
-## Installation & Deployment
+## 🚀 Deployment Status
+
+✅ **DEPLOYED TO ONECHAIN TESTNET**
+
+- **Package ID:** `0x8d3eb7a31ea0556530f86016db319c9f3bc7740932f8f8a2a1cc5dfa892b5be5`
+- **Registry ID:** `0xaf2ead52c59352fa51b88b8c07a586ee5605f8f54fbc68d6842af1e85803a4d4`
+- **Transaction:** `CcSWzdaynYMGryCfpPPEmpRiE4epp4KZbY4RyyNKdbMo`
+- **Explorer:** [View on OneScan](https://onescan.cc/testnet/object/0x8d3eb7a31ea0556530f86016db319c9f3bc7740932f8f8a2a1cc5dfa892b5be5)
+- **Network:** OneChain Testnet
+- **Deployment Date:** March 27, 2026
+
+## Installation & Setup
 
 ### 1. Setup OneChain CLI
 
@@ -44,7 +55,17 @@ one client new-env --alias testnet --rpc https://rpc-testnet.onelabs.cc:443
 one client switch --env testnet
 ```
 
-### 2. Build & Deploy Contract
+### 2. Run Frontend (Already Configured)
+
+The frontend is already configured with the deployed contract addresses.
+
+```bash
+cd CertiChain/frontend
+npm install
+npm run dev
+```
+
+### 3. (Optional) Deploy Your Own Instance
 
 ```bash
 cd CertiChain/contracts
@@ -52,23 +73,7 @@ one move build
 one client publish --gas-budget 50000000 .
 ```
 
-Save the Package ID and Registry ID.
-
-### 3. Configure Frontend
-
-Update `frontend/.env`:
-```
-VITE_PACKAGE_ID=0x<your_package_id>
-VITE_REGISTRY_ID=0x<your_registry_id>
-```
-
-### 4. Run Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
+Then update `frontend/.env` with your Package ID and Registry ID.
 
 ## Usage
 
