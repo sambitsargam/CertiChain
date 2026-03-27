@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@onelabs/dapp-kit';
+import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction } from '@onelabs/dapp-kit';
 import { Transaction } from '@onelabs/sui/transactions';
 import '../styles/Dashboard.css';
 
 const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID;
 const REGISTRY_ID = import.meta.env.VITE_REGISTRY_ID;
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
 interface Certificate {
   id: string;
@@ -22,7 +21,6 @@ function Dashboard() {
   const navigate = useNavigate();
   const account = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
-  const suiClient = useSuiClient();
   
   const [activeTab, setActiveTab] = useState<'issue' | 'mycerts' | 'analytics'>('issue');
   const [formData, setFormData] = useState({

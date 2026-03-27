@@ -1,228 +1,395 @@
 import { useNavigate } from 'react-router-dom';
 import { ConnectButton } from '@onelabs/dapp-kit';
-import '../styles/Landing.css';
+import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 function Landing() {
   const navigate = useNavigate();
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring' as const,
+        stiffness: 100,
+      },
+    },
+  };
+
+  const features = [
+    {
+      icon: '🔐',
+      title: 'Tamper-Proof',
+      description: 'Certificates stored immutably on OneChain blockchain with cryptographic verification.',
+    },
+    {
+      icon: '🤖',
+      title: 'AI Verification',
+      description: 'Advanced AI algorithms detect fraud and validate certificate authenticity in real-time.',
+    },
+    {
+      icon: '⚡',
+      title: 'Instant Issuance',
+      description: 'Issue certificates in seconds with automated blockchain transactions.',
+    },
+    {
+      icon: '🌍',
+      title: 'Global Access',
+      description: 'Anyone, anywhere can verify certificate authenticity instantly.',
+    },
+    {
+      icon: '📊',
+      title: 'Analytics',
+      description: 'Track issuance metrics and institutional performance in real-time.',
+    },
+    {
+      icon: '🎨',
+      title: 'Custom Design',
+      description: 'Beautiful certificates with customizable templates and branding.',
+    },
+  ];
+
+  const steps = [
+    { number: '01', title: 'Register', description: 'Connect wallet and register as issuer', icon: '🏛️' },
+    { number: '02', title: 'Issue', description: 'Create and mint certificate NFTs', icon: '📝' },
+    { number: '03', title: 'Verify', description: 'AI validates authenticity', icon: '🤖' },
+    { number: '04', title: 'Share', description: 'Recipients receive verified credentials', icon: '✅' },
+  ];
 
   return (
-    <div className="certichain-landing">
+    <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Animated Background */}
-      <div className="animated-bg">
-        <div className="cert-float cert-1">🎓</div>
-        <div className="cert-float cert-2">📜</div>
-        <div className="cert-float cert-3">🏆</div>
-        <div className="cert-float cert-4">✨</div>
-        <div className="grid-overlay"></div>
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-pink-500/10" />
+        <motion.div
+          className="absolute w-96 h-96 bg-orange-500/20 rounded-full blur-3xl"
+          animate={{
+            x: mousePosition.x - 200,
+            y: mousePosition.y - 200,
+          }}
+          transition={{ type: 'spring', damping: 30 }}
+        />
+        <div className="absolute top-20 left-20 w-72 h-72 bg-pink-500/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
       </div>
 
       {/* Navigation */}
-      <nav className="landing-nav">
-        <div className="nav-logo">
-          <span className="logo-icon">🎓</span>
-          <span className="logo-text">CertiChain</span>
+      <motion.nav
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10"
+      >
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <motion.div
+            className="flex items-center gap-3 cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+            onClick={() => navigate('/')}
+          >
+            <span className="text-4xl">🎓</span>
+            <span className="text-2xl font-bold text-gradient">CertiChain</span>
+          </motion.div>
+          <div className="flex items-center gap-6">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/verify')}
+              className="text-gray-300 hover:text-white transition-colors"
+            >
+              Verify
+            </motion.button>
+            <ConnectButton />
+          </div>
         </div>
-        <div className="nav-actions">
-          <button className="nav-link" onClick={() => navigate('/verify')}>
-            Verify Certificate
-          </button>
-          <ConnectButton />
-        </div>
-      </nav>
+      </motion.nav>
 
       {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <div className="hero-badge">
-            <span className="badge-icon">🤖</span>
-            <span>AI-Powered Verification</span>
-          </div>
-          <h1 className="hero-title">
-            The Future of
-            <br />
-            <span className="gradient-text">Digital Credentials</span>
-          </h1>
-          <p className="hero-description">
-            Issue, manage, and verify tamper-proof certificates on the blockchain.
-            Powered by AI for enhanced security and authenticity validation.
-          </p>
-          <div className="hero-buttons">
-            <button className="btn-primary" onClick={() => navigate('/app')}>
-              Get Started
-              <span className="btn-arrow">→</span>
-            </button>
-            <button className="btn-secondary" onClick={() => navigate('/explore')}>
-              Explore Certificates
-            </button>
-          </div>
-          <div className="hero-stats">
-            <div className="stat-item">
-              <div className="stat-value">10K+</div>
-              <div className="stat-label">Certificates Issued</div>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
-              <div className="stat-value">500+</div>
-              <div className="stat-label">Verified Institutions</div>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
-              <div className="stat-value">99.9%</div>
-              <div className="stat-label">AI Accuracy</div>
-            </div>
-          </div>
-        </div>
-        <div className="hero-visual">
-          <div className="certificate-preview">
-            <div className="cert-header">
-              <div className="cert-seal">🎓</div>
-              <div className="cert-badge-verified">✓ Verified</div>
-            </div>
-            <div className="cert-body">
-              <h3>Certificate of Achievement</h3>
-              <p className="cert-recipient">John Doe</p>
-              <p className="cert-course">Blockchain Development</p>
-              <p className="cert-institution">OneChain Academy</p>
-            </div>
-            <div className="cert-footer">
-              <div className="cert-qr">
-                <div className="qr-code"></div>
-              </div>
-              <div className="cert-signature">
-                <div className="signature-line"></div>
-                <p>Authorized Signature</p>
-              </div>
-            </div>
-          </div>
+      <section className="relative pt-32 pb-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="text-center max-w-4xl mx-auto"
+          >
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 glass rounded-full mb-8">
+              <span className="text-2xl">🤖</span>
+              <span className="text-sm font-medium">AI-Powered Verification</span>
+            </motion.div>
+
+            <motion.h1
+              variants={itemVariants}
+              className="text-6xl md:text-8xl font-bold mb-6 leading-tight"
+            >
+              The Future of
+              <br />
+              <span className="text-gradient">Digital Credentials</span>
+            </motion.h1>
+
+            <motion.p
+              variants={itemVariants}
+              className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto"
+            >
+              Issue, manage, and verify tamper-proof certificates on the blockchain.
+              Powered by AI for enhanced security and authenticity validation.
+            </motion.p>
+
+            <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-4">
+              <motion.button
+                whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(249, 115, 22, 0.5)' }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/app')}
+                className="px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-semibold text-lg flex items-center gap-2 group"
+              >
+                Get Started
+                <motion.span
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                >
+                  →
+                </motion.span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/explore')}
+                className="px-8 py-4 glass rounded-xl font-semibold text-lg hover:bg-white/10 transition-colors"
+              >
+                Explore Certificates
+              </motion.button>
+            </motion.div>
+
+            {/* Stats */}
+            <motion.div
+              variants={itemVariants}
+              className="grid grid-cols-3 gap-8 mt-20 max-w-3xl mx-auto"
+            >
+              {[
+                { value: '10K+', label: 'Certificates Issued' },
+                { value: '500+', label: 'Institutions' },
+                { value: '99.9%', label: 'AI Accuracy' },
+              ].map((stat, i) => (
+                <motion.div
+                  key={i}
+                  whileHover={{ scale: 1.05 }}
+                  className="glass rounded-2xl p-6"
+                >
+                  <div className="text-4xl font-bold text-gradient mb-2">{stat.value}</div>
+                  <div className="text-sm text-gray-400">{stat.label}</div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="features-section">
-        <div className="section-header">
-          <h2>Why Choose CertiChain?</h2>
-          <p>The most advanced certification platform on blockchain</p>
+      {/* Dashboard Preview */}
+      <section className="relative py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl font-bold mb-4">
+              Powerful <span className="text-gradient">Dashboard</span>
+            </h2>
+            <p className="text-xl text-gray-400">Manage everything from one place</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="glass rounded-3xl p-8 glow-orange"
+          >
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { icon: '📜', value: '156', label: 'Total Issued', color: 'from-orange-500 to-red-500' },
+                { icon: '✅', value: '142', label: 'Verified', color: 'from-green-500 to-emerald-500' },
+                { icon: '⭐', value: '94', label: 'Avg Score', color: 'from-blue-500 to-cyan-500' },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  className="glass rounded-2xl p-6 cursor-pointer"
+                >
+                  <div className="text-4xl mb-4">{item.icon}</div>
+                  <div className={`text-4xl font-bold bg-gradient-to-r ${item.color} bg-clip-text text-transparent mb-2`}>
+                    {item.value}
+                  </div>
+                  <div className="text-gray-400">{item.label}</div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         </div>
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon">🔐</div>
-            <h3>Tamper-Proof</h3>
-            <p>Certificates stored immutably on OneChain blockchain, ensuring permanent and unalterable records.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">🤖</div>
-            <h3>AI Verification</h3>
-            <p>Advanced AI algorithms detect fraud and validate certificate authenticity in real-time.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">⚡</div>
-            <h3>Instant Issuance</h3>
-            <p>Issue certificates in seconds with automated blockchain transactions and NFT minting.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">🌍</div>
-            <h3>Global Verification</h3>
-            <p>Anyone, anywhere can verify certificate authenticity with a simple blockchain query.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">📊</div>
-            <h3>Analytics Dashboard</h3>
-            <p>Track issuance metrics, verification rates, and institutional performance.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">🎨</div>
-            <h3>Custom Templates</h3>
-            <p>Design beautiful certificates with customizable templates and branding options.</p>
+      </section>
+
+      {/* Features Grid */}
+      <section className="relative py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl font-bold mb-4">
+              Why Choose <span className="text-gradient">CertiChain</span>?
+            </h2>
+            <p className="text-xl text-gray-400">The most advanced certification platform</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {features.map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ scale: 1.05, y: -10 }}
+                className="glass rounded-2xl p-8 cursor-pointer group"
+              >
+                <motion.div
+                  className="text-5xl mb-4"
+                  whileHover={{ scale: 1.2, rotate: 10 }}
+                >
+                  {feature.icon}
+                </motion.div>
+                <h3 className="text-2xl font-bold mb-3 group-hover:text-gradient transition-all">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-400 leading-relaxed">{feature.description}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="how-it-works">
-        <div className="section-header">
-          <h2>How It Works</h2>
-          <p>Simple, secure, and efficient</p>
-        </div>
-        <div className="steps-container">
-          <div className="step-card">
-            <div className="step-number">01</div>
-            <div className="step-icon">🏛️</div>
-            <h3>Register Institution</h3>
-            <p>Connect your wallet and register as a verified certificate issuer on the platform.</p>
-          </div>
-          <div className="step-arrow">→</div>
-          <div className="step-card">
-            <div className="step-number">02</div>
-            <div className="step-icon">📝</div>
-            <h3>Issue Certificate</h3>
-            <p>Fill in recipient details and certificate information to mint an NFT credential.</p>
-          </div>
-          <div className="step-arrow">→</div>
-          <div className="step-card">
-            <div className="step-number">03</div>
-            <div className="step-icon">🤖</div>
-            <h3>AI Validation</h3>
-            <p>Our AI automatically validates and scores the certificate for authenticity.</p>
-          </div>
-          <div className="step-arrow">→</div>
-          <div className="step-card">
-            <div className="step-number">04</div>
-            <div className="step-icon">✅</div>
-            <h3>Verify Anytime</h3>
-            <p>Recipients and verifiers can check certificate authenticity on the blockchain.</p>
+      <section className="relative py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl font-bold mb-4">How It Works</h2>
+            <p className="text-xl text-gray-400">Simple, secure, and efficient</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-4 gap-6">
+            {steps.map((step, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.2 }}
+                whileHover={{ scale: 1.05 }}
+                className="glass rounded-2xl p-8 relative"
+              >
+                <div className="text-6xl font-bold text-white/10 absolute top-4 right-4">
+                  {step.number}
+                </div>
+                <div className="text-5xl mb-4">{step.icon}</div>
+                <h3 className="text-2xl font-bold mb-3">{step.title}</h3>
+                <p className="text-gray-400">{step.description}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="cta-section">
-        <div className="cta-content">
-          <h2>Ready to Get Started?</h2>
-          <p>Join hundreds of institutions already using CertiChain</p>
-          <button className="btn-cta" onClick={() => navigate('/app')}>
-            Launch Application
-            <span className="btn-arrow">→</span>
-          </button>
+      <section className="relative py-32 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="glass rounded-3xl p-16 glow-orange"
+          >
+            <h2 className="text-5xl font-bold mb-6">
+              Ready to Get Started?
+            </h2>
+            <p className="text-xl text-gray-400 mb-10">
+              Join hundreds of institutions already using CertiChain
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: '0 0 60px rgba(249, 115, 22, 0.6)' }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/app')}
+              className="px-12 py-5 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-bold text-xl"
+            >
+              Launch Application →
+            </motion.button>
+          </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="landing-footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <div className="footer-logo">
-              <span className="logo-icon">🎓</span>
-              <span className="logo-text">CertiChain</span>
+      <footer className="relative border-t border-white/10 py-12 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-3xl">🎓</span>
+                <span className="text-xl font-bold text-gradient">CertiChain</span>
+              </div>
+              <p className="text-gray-400 text-sm">
+                Securing credentials on OneChain blockchain
+              </p>
             </div>
-            <p>Securing credentials on OneChain blockchain</p>
+            {[
+              { title: 'Product', links: ['Features', 'Pricing', 'Security'] },
+              { title: 'Resources', links: ['Documentation', 'API', 'Support'] },
+              { title: 'Company', links: ['About', 'Blog', 'Contact'] },
+            ].map((col, i) => (
+              <div key={i}>
+                <h4 className="font-semibold mb-4">{col.title}</h4>
+                {col.links.map((link, j) => (
+                  <div key={j} className="text-gray-400 text-sm mb-2 hover:text-white cursor-pointer transition-colors">
+                    {link}
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
-          <div className="footer-links">
-            <div className="footer-column">
-              <h4>Product</h4>
-              <a href="#features">Features</a>
-              <a href="#how-it-works">How It Works</a>
-              <a href="#pricing">Pricing</a>
+          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-400 text-sm">© 2026 CertiChain. All rights reserved.</p>
+            <div className="flex gap-6 text-sm text-gray-400">
+              <span className="hover:text-white cursor-pointer transition-colors">Twitter</span>
+              <span className="hover:text-white cursor-pointer transition-colors">GitHub</span>
+              <span className="hover:text-white cursor-pointer transition-colors">Discord</span>
             </div>
-            <div className="footer-column">
-              <h4>Resources</h4>
-              <a href="#docs">Documentation</a>
-              <a href="#api">API</a>
-              <a href="#support">Support</a>
-            </div>
-            <div className="footer-column">
-              <h4>Company</h4>
-              <a href="#about">About</a>
-              <a href="#blog">Blog</a>
-              <a href="#contact">Contact</a>
-            </div>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>© 2026 CertiChain. All rights reserved.</p>
-          <div className="footer-social">
-            <a href="#twitter">Twitter</a>
-            <a href="#github">GitHub</a>
-            <a href="#discord">Discord</a>
           </div>
         </div>
       </footer>
