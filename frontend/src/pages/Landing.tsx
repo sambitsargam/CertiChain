@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { ConnectButton } from '@onelabs/dapp-kit';
+import { ConnectButton, useCurrentAccount } from '@onelabs/dapp-kit';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
 function Landing() {
   const navigate = useNavigate();
+  const account = useCurrentAccount();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [shouldNavigate, setShouldNavigate] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -14,6 +16,27 @@ function Landing() {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  // Navigate to app when wallet is connected and user clicked a button
+  useEffect(() => {
+    if (account && shouldNavigate) {
+      navigate('/app');
+      setShouldNavigate(false);
+    }
+  }, [account, shouldNavigate, navigate]);
+
+  const handleGetStarted = () => {
+    if (account) {
+      navigate('/app');
+    } else {
+      setShouldNavigate(true);
+      // Trigger wallet connection by clicking the connect button
+      const connectBtn = document.querySelector('[data-testid="connect-button"]') as HTMLButtonElement;
+      if (connectBtn) {
+        connectBtn.click();
+      }
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -159,7 +182,7 @@ function Landing() {
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(249, 115, 22, 0.5)' }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/app')}
+                onClick={handleGetStarted}
                 className="px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-semibold text-base flex items-center gap-2 group"
               >
                 Get Started
@@ -346,7 +369,7 @@ function Landing() {
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: '0 0 60px rgba(249, 115, 22, 0.6)' }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/app')}
+              onClick={handleGetStarted}
               className="px-10 py-4 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-bold text-lg"
             >
               Launch Application →
