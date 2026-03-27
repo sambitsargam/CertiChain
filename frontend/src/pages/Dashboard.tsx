@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction } from '@onelabs/dapp-kit';
+import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@onelabs/dapp-kit';
 import { Transaction } from '@onelabs/sui/transactions';
 import '../styles/Dashboard.css';
 
@@ -20,6 +20,7 @@ interface Certificate {
 function Dashboard() {
   const navigate = useNavigate();
   const account = useCurrentAccount();
+  const suiClient = useSuiClient();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   
   const [activeTab, setActiveTab] = useState<'issue' | 'mycerts' | 'analytics'>('issue');
@@ -38,6 +39,7 @@ function Dashboard() {
   const [myCertificates, setMyCertificates] = useState<Certificate[]>([]);
   const [aiAnalysis, setAiAnalysis] = useState<string>('');
   const [analyzingWithAI, setAnalyzingWithAI] = useState(false);
+  const [fetchingCerts, setFetchingCerts] = useState(false);
 
   const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
@@ -51,32 +53,64 @@ function Dashboard() {
   }, [account, navigate]);
 
   const checkRegistration = async () => {
-    // Dummy check - in real app, query blockchain
-    setIsRegistered(true);
+    if (!account) return;
+    
+    try {
+      // Query if user is registered as issuer
+      const objects = await suiClient.getOwnedObjects({
+        owner: account.address,
+        filter: {
+          StructType: `${PACKAGE_ID}::certification::IssuerCap`
+        },
+      });
+      
+      setIsRegistered(objects.data.length > 0);
+    } catch (error) {
+      console.error('Error checking registration:', error);
+      // Default to not registered on error
+      setIsRegistered(false);
+    }
   };
 
   const fetchMyCertificates = async () => {
-    // Dummy data for demonstration
-    setMyCertificates([
-      {
-        id: '0x123...abc',
-        recipient: '0x456...def',
-        title: 'Blockchain Development Certificate',
-        institution: 'OneChain Academy',
-        issue_date: Date.now() - 86400000,
-        ai_verified: true,
-        verification_score: 95
-      },
-      {
-        id: '0x789...ghi',
-        recipient: '0x012...jkl',
-        title: 'Smart Contract Security',
-        institution: 'OneChain Academy',
-        issue_date: Date.now() - 172800000,
-        ai_verified: true,
-        verification_score: 92
+    if (!account) return;
+    
+    setFetchingCerts(true);
+    try {
+      // Fetch all certificate events issued by this user
+      const events = await suiClient.queryEvents({
+        query: {
+          MoveEventType: `${PACKAGE_ID}::certification::CertificateIssued`
+        },
+        limit: 50,
+      });
+
+      const certs: Certificate[] = [];
+      
+      for (const event of events.data) {
+        const eventData = event.parsedJson as any;
+        
+        // Only include certificates issued by current user
+        if (eventData.issuer === account.address) {
+          certs.push({
+            id: eventData.certificate_id || event.id.txDigest,
+            recipient: eventData.recipient,
+            title: eventData.title,
+            institution: eventData.institution,
+            issue_date: parseInt(eventData.timestamp) || Date.now(),
+            ai_verified: true,
+            verification_score: 85 // Default score, can be enhanced
+          });
+        }
       }
-    ]);
+      
+      setMyCertificates(certs);
+    } catch (error) {
+      console.error('Error fetching certificates:', error);
+      setMyCertificates([]);
+    } finally {
+      setFetchingCerts(false);
+    }
   };
 
   const registerIssuer = async () => {
@@ -490,14 +524,19 @@ function Dashboard() {
 
               {activeTab === 'mycerts' && (
                 <div className="mycerts-tab">
-                  {myCertificates.length > 0 ? (
+                  {fetchingCerts ? (
+                    <div className="loading-container">
+                      <div className="loading-spinner"></div>
+                      <p>Loading certificates...</p>
+                    </div>
+                  ) : myCertificates.length > 0 ? (
                     <div className="certificates-grid">
                       {myCertificates.map((cert) => (
                         <div key={cert.id} className="cert-card">
                           <div className="cert-card-header">
                             <div className="cert-icon">🎓</div>
                             {cert.ai_verified && (
-                              <div className="verified-badge">✓ Verified</div>
+                              <div className="verified-badge">✓ AI Verified</div>
                             )}
                           </div>
                           <h3>{cert.title}</h3>
@@ -521,6 +560,13 @@ function Dashboard() {
                       <div className="empty-icon">📜</div>
                       <h3>No Certificates Yet</h3>
                       <p>Start issuing certificates to see them here</p>
+                      <button 
+                        onClick={() => setActiveTab('issue')}
+                        className="btn-issue"
+                        style={{ marginTop: '1rem' }}
+                      >
+                        Issue Your First Certificate
+                      </button>
                     </div>
                   )}
                 </div>
